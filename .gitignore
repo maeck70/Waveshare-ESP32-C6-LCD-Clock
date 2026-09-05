@@ -1,0 +1,34 @@
+# PlatformIO build artifacts & libraries
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# Python virtual environment & cache
+venv/
+.venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ESP-IDF build output & temporary files
+build/
+managed_components/
+dependencies.lock
+sdkconfig.old
+
+# IDE & Editor artifacts
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Backup & swap files
+*~
+*.swp
+*.swo
