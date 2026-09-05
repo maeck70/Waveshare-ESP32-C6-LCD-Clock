@@ -41,19 +41,13 @@ uint8_t ui_get_rotation(void);
 void ui_toggle_rotation(void);
 
 /**
- * @brief Render the complete scene (time digits, separator accent, date string) and flush to display.
+ * @brief Render the complete scene (time digits with 75-degree glowing wave, date string) and flush to display.
  *
  * @param time_str Null-terminated string formatted as "HH:MM:SS" (8 characters).
- * @param time_r Array of 8 red channel color values for each digit/colon character.
- * @param time_g Array of 8 green channel color values for each digit/colon character.
- * @param time_b Array of 8 blue channel color values for each digit/colon character.
+ * @param phase Current glowing wave animation phase in radians.
  * @param date_str Null-terminated date string to display in the bottom row.
  */
-void ui_render_scene(const char *time_str,
-                     const uint8_t time_r[8],
-                     const uint8_t time_g[8],
-                     const uint8_t time_b[8],
-                     const char *date_str);
+void ui_render_scene(const char *time_str, float phase, const char *date_str);
 
 #ifdef __cplusplus
 }

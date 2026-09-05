@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "app_font_data.h"
+#include "effects.h"
 #include "esp_log.h"
 #include "st7789.h"
 
@@ -35,40 +36,7 @@ void ui_toggle_rotation(void) {
     ui_set_rotation(1 - s_rotation);
 }
 
-/**
- * @brief Render a single time digit/colon character using alpha-blending onto black.
- *
- * @param x Top-left X coordinate.
- * @param y Top-left Y coordinate.
- * @param c Character to render.
- * @param r_fg Foreground red channel (0..255).
- * @param g_fg Foreground green channel (0..255).
- * @param b_fg Foreground blue channel (0..255).
- */
-static void draw_time_char(int x, int y, char c, uint8_t r_fg, uint8_t g_fg, uint8_t b_fg) {
-    const glyph_desc_t *g = get_time_glyph(c);
-    if (!g) return;
 
-    for (int row = 0; row < g->height; row++) {
-        int py = y + row;
-        if (py < 0 || py >= LCD_HEIGHT) continue;
-        const uint8_t *src_line = &g->bitmap[row * g->width];
-        for (int col = 0; col < g->width; col++) {
-            int px = x + col;
-            if (px < 0 || px >= LCD_WIDTH) continue;
-            uint8_t a = src_line[col];
-            if (a == 0) continue;
-            if (a >= 250) {
-                fb_draw_pixel(px, py, color565(r_fg, g_fg, b_fg));
-            } else {
-                uint8_t r = (uint8_t)(((uint16_t)r_fg * a) >> 8);
-                uint8_t g_val = (uint8_t)(((uint16_t)g_fg * a) >> 8);
-                uint8_t b = (uint8_t)(((uint16_t)b_fg * a) >> 8);
-                fb_draw_pixel(px, py, color565(r, g_val, b));
-            }
-        }
-    }
-}
 
 /**
  * @brief Calculate total horizontal pixel width of a time string.
@@ -89,6 +57,52 @@ static int get_time_width(const char *str, int spacing) {
     }
     if (count > 1) w += (count - 1) * spacing;
     return w;
+}
+
+/**
+ * @brief Render a single time character with 75-degree angled rainbow glow.
+ *
+ * @param x Top-left X coordinate.
+ * @param y Top-left Y coordinate.
+ * @param c Character to render.
+ * @param phase_offset Spatial phase offset for 75-degree wave.
+ */
+static void draw_time_char_angled(int x, int y, char c, int phase_offset) {
+    const glyph_desc_t *g = get_time_glyph(c);
+    if (!g) return;
+
+    for (int row = 0; row < g->height; row++) {
+        int py = y + row;
+        if (py < 0 || py >= LCD_HEIGHT) continue;
+        int row_base = py * 247; // 256 * sin(75°) ≈ 247
+        const uint8_t *src_line = &g->bitmap[row * g->width];
+
+        for (int col = 0; col < g->width; col++) {
+            int px = x + col;
+            if (px < 0 || px >= LCD_WIDTH) continue;
+            uint8_t a = src_line[col];
+            if (a == 0) continue;
+
+            // Smooth 75-degree wave projection across the complete time block:
+            // 256 * cos(75°) ≈ 66, 256 * sin(75°) ≈ 247
+            // Scale factor 210/256 creates a gentle, wide wavelength across the entire block
+            int proj = (px * 66 + row_base) >> 8;
+            int u = ((proj * 210) >> 8) - phase_offset;
+            uint8_t idx = (uint8_t)(u & 0xFF);
+
+            uint8_t pr, pg, pb;
+            effects_get_palette_color(idx, &pr, &pg, &pb);
+
+            if (a >= 250) {
+                fb_draw_pixel(px, py, color565(pr, pg, pb));
+            } else {
+                uint8_t r = (uint8_t)(((uint16_t)pr * a) >> 8);
+                uint8_t g_val = (uint8_t)(((uint16_t)pg * a) >> 8);
+                uint8_t b = (uint8_t)(((uint16_t)pb * a) >> 8);
+                fb_draw_pixel(px, py, color565(r, g_val, b));
+            }
+        }
+    }
 }
 
 /**
@@ -176,24 +190,22 @@ static void draw_date_string(int x, int y, const char *str, uint8_t r, uint8_t g
     }
 }
 
-void ui_render_scene(const char *time_str,
-                     const uint8_t time_r[8],
-                     const uint8_t time_g[8],
-                     const uint8_t time_b[8],
-                     const char *date_str) {
+void ui_render_scene(const char *time_str, float phase, const char *date_str) {
     // 1. Pure black background
     fb_clear(0x0000);
 
-    // 2. Render Top Row (Time: "HH:MM:SS")
+    // 2. Render Top Row (Time: "HH:MM:SS") with 75-degree glowing wave
     const int time_spacing = 3;
     const int total_time_w = get_time_width(time_str, time_spacing);
     const int time_x0 = (LCD_WIDTH - total_time_w) / 2; // Centered
     const int time_y = 22;                             // Top margin: 22 px (Y: 22..90)
 
+    int phase_offset = (int)(phase * (256.0f / 6.2831853f));
+
     int cur_x = time_x0;
     for (int i = 0; i < 8 && time_str[i] != '\0'; i++) {
         char c = time_str[i];
-        draw_time_char(cur_x, time_y, c, time_r[i], time_g[i], time_b[i]);
+        draw_time_char_angled(cur_x, time_y, c, phase_offset);
         const glyph_desc_t *g = get_time_glyph(c);
         if (g) {
             cur_x += g->width + time_spacing;

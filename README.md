@@ -15,7 +15,7 @@ A real-time digital clock and ambient lighting display designed for the **Wavesh
 - **Internet Time Synchronization (SNTP & Wi-Fi 6)**: Connects to your local Wi-Fi network and synchronizes atomic clock time using SNTP (`pool.ntp.org` / Google NTP). Automatically applies local timezones and Daylight Saving Time (DST).
 - **Private Credentials via `.env`**: Wi-Fi SSID, password, and timezone are stored in a local, git-ignored `.env` file and processed automatically at build time. No credentials are ever committed to git.
 - **Anti-Aliased Typography**: Large, smooth 68 px time digits and 28 px date glyphs rendered with per-pixel alpha blending against pure pitch black (`#000000`).
-- **Dynamic Warm Glow**: Real-time sinusoidal phase calculation creating a shifting orange-to-red thermal gradient across the clock digits.
+- **75° Angled Rainbow Glow Wave**: Continuous, ultra-smooth red-to-yellowish-orange thermal gradient traveling across the complete time block at an exact 75-degree angle (calculated via optimized 2D integer projection and precomputed cosine palette, eliminating sharp banding).
 - **Synchronized WS2812 Underglow**: The onboard addressable RGB LED (`GPIO 8`) pulses with the display's thermal color palette through the acrylic casing.
 - **180° Display Flip**: Toggle orientation on the fly by pressing the tactile **BOOT** button (`GPIO 9`).
 - **USB Serial Synchronization**: Fallback instant time/date sync at 115200 baud over `/dev/ttyACM0`.

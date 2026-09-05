@@ -57,7 +57,6 @@ void app_main(void) {
 
     int64_t last_log_time = esp_timer_get_time();
     float phase = 0.0f;
-    uint8_t time_r[8], time_g[8], time_b[8];
     uint8_t led_r, led_g, led_b;
     char time_str[16];
 
@@ -74,15 +73,15 @@ void app_main(void) {
             ESP_LOGI(TAG, "Tick: %s | Date: %s", time_str, clock_get_date_str());
         }
 
-        // Update glow animation phase, digit colors, and LED underglow color
-        effects_update(&phase, time_r, time_g, time_b, &led_r, &led_g, &led_b);
+        // Update glow animation phase and LED underglow color
+        effects_update(&phase, &led_r, &led_g, &led_b);
 
         // Update the onboard WS2812 underglow RGB LED
         ws2812_set_rgb(led_r, led_g, led_b);
 
-        // Render current scene and transfer to display over SPI
+        // Render current scene with 75-degree angled glow wave
         clock_get_time_str(time_str, sizeof(time_str));
-        ui_render_scene(time_str, time_r, time_g, time_b, clock_get_date_str());
+        ui_render_scene(time_str, phase, clock_get_date_str());
 
         // 35ms frame delay (~28 FPS)
         vTaskDelay(pdMS_TO_TICKS(35));
