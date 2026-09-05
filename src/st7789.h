@@ -116,41 +116,6 @@ void fb_fill_rect(int x, int y, int w, int h, uint16_t color);
 void fb_draw_line_h(int x0, int x1, int y, uint16_t color);
 
 /**
- * @brief Draw an ASCII character using the built-in 8x16 bitmap font.
- *
- * @param x Starting X coordinate.
- * @param y Starting Y coordinate.
- * @param c ASCII character to draw.
- * @param color 16-bit byte-swapped RGB565 color.
- * @param sx Horizontal scale multiplier (e.g. 1, 2).
- * @param sy Vertical scale multiplier (e.g. 1, 2).
- */
-void fb_draw_char(int x, int y, char c, uint16_t color, int sx, int sy);
-
-/**
- * @brief Draw a string using the built-in 8x16 bitmap font.
- *
- * @param x Starting X coordinate.
- * @param y Starting Y coordinate.
- * @param str Null-terminated string to draw.
- * @param color 16-bit byte-swapped RGB565 color.
- * @param sx Horizontal scale multiplier.
- * @param sy Vertical scale multiplier.
- * @param spacing Additional pixel spacing between characters.
- */
-void fb_draw_string(int x, int y, const char *str, uint16_t color, int sx, int sy, int spacing);
-
-/**
- * @brief Calculate pixel width of a string rendered with the built-in 8x16 font.
- *
- * @param str Null-terminated string.
- * @param sx Horizontal scale multiplier.
- * @param spacing Additional pixel spacing between characters.
- * @return Total width in pixels.
- */
-int fb_get_string_width(const char *str, int sx, int spacing);
-
-/**
  * @brief Flush internal RAM framebuffer to the ST7789 LCD over SPI DMA / polling.
  */
 void st7789_flush(void);

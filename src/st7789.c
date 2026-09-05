@@ -4,7 +4,6 @@
  */
 
 #include "st7789.h"
-#include "font8x16.h"
 
 #include <string.h>
 #include "driver/gpio.h"
@@ -255,36 +254,6 @@ void fb_draw_line_h(int x0, int x1, int y, uint16_t color) {
     for (int i = x0; i <= x1; i++) {
         line[i] = color;
     }
-}
-
-void fb_draw_char(int x, int y, char c, uint16_t color, int sx, int sy) {
-    const uint8_t *glyph = &font8x16[(unsigned char)c * 16];
-    for (int r = 0; r < 16; r++) {
-        uint8_t row = glyph[r];
-        if (row == 0) continue;
-        for (int col = 0; col < 8; col++) {
-            if (row & (0x80 >> col)) {
-                fb_fill_rect(x + col * sx, y + r * sy, sx, sy, color);
-            }
-        }
-    }
-}
-
-void fb_draw_string(int x, int y, const char *str, uint16_t color, int sx, int sy, int spacing) {
-    if (!str) return;
-    int cur_x = x;
-    while (*str) {
-        fb_draw_char(cur_x, y, *str, color, sx, sy);
-        cur_x += (8 * sx) + spacing;
-        str++;
-    }
-}
-
-int fb_get_string_width(const char *str, int sx, int spacing) {
-    if (!str) return 0;
-    int len = strlen(str);
-    if (len == 0) return 0;
-    return len * (8 * sx) + (len - 1) * spacing;
 }
 
 void st7789_flush(void) {
