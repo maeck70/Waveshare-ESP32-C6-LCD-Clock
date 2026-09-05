@@ -93,7 +93,7 @@ void st7789_set_backlight(bool enable) {
 }
 
 static void lcd_set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
-    uint8_t caset[4] = {
+    const uint8_t caset[4] = {
         (uint8_t)((x0 + LCD_X_OFFSET) >> 8),
         (uint8_t)((x0 + LCD_X_OFFSET) & 0xFF),
         (uint8_t)((x1 + LCD_X_OFFSET) >> 8),
@@ -102,7 +102,7 @@ static void lcd_set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
     lcd_cmd(0x2A); // CASET
     lcd_data(caset, 4);
 
-    uint8_t raset[4] = {
+    const uint8_t raset[4] = {
         (uint8_t)((y0 + LCD_Y_OFFSET) >> 8),
         (uint8_t)((y0 + LCD_Y_OFFSET) & 0xFF),
         (uint8_t)((y1 + LCD_Y_OFFSET) >> 8),
