@@ -15,6 +15,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "ui.h"
+#include "wifi_time.h"
 #include "ws2812.h"
 
 static const char *TAG = "MAIN_APP";
@@ -48,6 +49,9 @@ void app_main(void) {
     // Start background tasks for BOOT button input and serial time sync
     button_init(on_boot_button_pressed);
     clock_serial_sync_init();
+
+    // Initialize Wi-Fi connection and SNTP internet time sync (configured in .env)
+    wifi_time_init();
 
     ESP_LOGI(TAG, "Clock and rainbow glow animation running...");
 

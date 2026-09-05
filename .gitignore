@@ -12,6 +12,15 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Local environment & Wi-Fi credentials
+.env
+.env.*
+!.env.example
+*.env
+wifi_config.h
+src/wifi_config.h
+include/wifi_config.h
+
 # ESP-IDF build output & temporary files
 build/
 managed_components/

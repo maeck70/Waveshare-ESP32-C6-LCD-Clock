@@ -4,10 +4,12 @@
  */
 
 #include "clock.h"
+#include "wifi_time.h"
 
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include "esp_log.h"
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
@@ -39,6 +41,26 @@ void clock_init(void) {
 }
 
 void clock_tick(void) {
+    if (wifi_time_is_synced()) {
+        time_t now;
+        struct tm ti;
+        time(&now);
+        localtime_r(&now, &ti);
+        s_hours   = ti.tm_hour;
+        s_minutes = ti.tm_min;
+        s_seconds = ti.tm_sec;
+
+        static const char *const months[12] = {
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        };
+        if (ti.tm_mon >= 0 && ti.tm_mon < 12) {
+            snprintf(s_date_str, sizeof(s_date_str), "%s %d, %d",
+                     months[ti.tm_mon], ti.tm_mday, 1900 + ti.tm_year);
+        }
+        return;
+    }
+
     int64_t now = esp_timer_get_time();
     if (now - s_last_sec_time >= 1000000) {
         int elapsed_secs = (int)((now - s_last_sec_time) / 1000000);
