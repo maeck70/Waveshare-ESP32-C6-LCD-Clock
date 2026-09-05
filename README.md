@@ -56,10 +56,23 @@ src/
 
 ## Getting Started
 
-### Prerequisites
+### Prerequisites & Environment Setup
 
-- [PlatformIO Core (CLI)](https://docs.platformio.org/page/core/index.html) or VSCode with PlatformIO extension.
-- A virtual environment with PlatformIO is pre-configured in `./venv/`.
+The repository relies on [PlatformIO Core](https://docs.platformio.org/page/core/index.html) running in Python 3. Both the Python virtual environment (`venv/`) and the build artifact directory (`.pio/`) are deliberately excluded from git tracking via `.gitignore` and are initialized locally:
+
+1. **Create the Python Virtual Environment (`venv/`)**:
+   ```bash
+   python3 -m venv venv
+   ./venv/bin/pip install -r requirements.txt
+   ```
+   *(Alternatively, if you already have PlatformIO installed globally or through VSCode, you can directly run `pio run`.)*
+
+2. **Automatic Toolchain & Build Provisioning (`.pio/`)**:
+   You do **not** need to manually download the RISC-V toolchain or ESP-IDF. On the first build, PlatformIO inspects `platformio.ini` and automatically creates `.pio/`, downloading:
+   - `toolchain-riscv32-esp` (RISC-V cross-compiler)
+   - `framework-espidf` (Espressif IoT Development Framework)
+   - `tool-ninja`, `tool-cmake`, and `tool-esptoolpy`
+   - Builds the partition table, bootloader, and final firmware binary into `.pio/build/esp32-c6-devkitc-1/`.
 
 ### Build Firmware
 
